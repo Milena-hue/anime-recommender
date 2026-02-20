@@ -123,8 +123,21 @@
     :studio "OLM"
     :rating 8.82}])
 
+;;Pretraga po žanru
+;;Filter prolazi kroz sve anime i izdvaja samo one koji imaju traženi žanr
+
+(defn find-by-genre
+  "Prima žanr kao string, vraća sve anime koji imaju taj žanr"
+  [genre]
+  (filter (fn [anime] 
+            (some #(= % genre) (:genres anime)))
+          anime-db))
+
 (defn -main
   "Anime Recommender - entry point"
   [& args]
   (println "Dobrodošli u Anime Recommeder!")
-  (println "Broj animea u bazi:" (count anime-db)))
+  (println "Broj animea u bazi:" (count anime-db))
+  (println "\nAction anime:")
+  (doseq [anime (find-by-genre "Action")] 
+    (println "-" (:title anime))))
