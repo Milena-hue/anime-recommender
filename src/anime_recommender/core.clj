@@ -142,14 +142,36 @@
             (= (:studio anime) studio))
           anime-db))
 
+;;Broji koliko se žanrova poklapa između dva animea
+
+(defn count-matching-genres
+  "Prima dva animea, vraća broj zajedničkih žanrova"
+  [anime1 anime2]
+  (count (filter (fn [genre]
+            (some #(= % genre) (:genres anime2)))
+          (:genres anime1))))
+
+;; Glavna recommendation funkcija
+
+(defn recommend
+  "Prima naziv animea koji si gledao, vraća top 3 slična"
+  [title]
+  (let [watched (first (filter #(= (:title %) title) anime-db))]
+    (if (nil? watched)
+      (println "Anime nije pronađen u bazi!")
+      (->> anime-db
+           (filter #(not= (:title %) title))
+           (sort-by #(count-matching-genres watched %) >)
+           (take 3)))))
+    
+
+
 (defn -main
   "Anime Recommender - entry point"
   [& args]
   (println "Dobrodošli u Anime Recommeder!")
   (println "Broj animea u bazi:" (count anime-db))
-  (println "\nAction anime:")
-  (doseq [anime (find-by-genre "Action")]
-    (println "-" (:title anime)))
-  (println "\nMAPPA anime:")
-  (doseq [anime (find-by-studio "MAPPA")]
-    (println "-" (:title anime))))
+  (println "\nPreporuka za Bleach:")
+  (doseq [anime (recommend "Bleach")]
+    (println "-" (:title anime) "| Rating:" (:rating anime))))
+  
