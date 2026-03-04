@@ -2,6 +2,7 @@
   (:require [compojure.core :refer [defroutes GET]]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.util.response :refer [response content-type]]
+            [ring.middleware.params :refer [wrap-params]]
             [cheshire.core :as json])
   (:gen-class))
 ;; Baza anime podataka
@@ -162,7 +163,7 @@
   [title]
   (let [watched (first (filter #(= (:title %) title) anime-db))]
     (if (nil? watched)
-      (println "Anime nije pronađen u bazi!")
+      []
       (->> anime-db
            (filter #(not= (:title %) title))
            (sort-by #(count-matching-genres watched %) >)
@@ -229,9 +230,9 @@
 
 (defroutes app-routes
   (GET "/" [] (home-page))
-  (GET "/api/recommend" [q] (content-type (response (json/encode (recommend q))) "aplication/json"))
-  (GET "/api/genre" [q] (content-type (response (json/encode (find-by-genre q))) "aplication/json"))
-  (GET "/api/studio" [q] (content-type (response (json/encode (find-by-studio q))) "aplication/json")))
+  (GET "/api/recommend" [q] (content-type (response (json/encode (vec (recommend q)))) "aplication/json"))
+  (GET "/api/genre" [q] (content-type (response (json/encode (vec (find-by-genre q)))) "aplication/json"))
+  (GET "/api/studio" [q] (content-type (response (json/encode (vec (find-by-studio q)))) "aplication/json")))
 
 
 (defn print-anime-list
@@ -255,5 +256,5 @@
   "Anime Recommender - entry point"
   [& args]
   (println "Pokrećemo Anime Recommender na http://localhost:3000")
-  (run-jetty app-routes {:port 3000 :join? false}))
+  (run-jetty (wrap-params app-routes) {:port 3000 :join? false}))
   
