@@ -1,4 +1,8 @@
 (ns anime-recommender.core
+  (:require [compojure.core :refer [defroutes GET]]
+            [ring.adapter.jetty :refer [run-jetty]]
+            [ring.util.response :refer [response content-type]]
+            [cheshire.core :as json])
   (:gen-class))
 ;; Baza anime podataka
 ;; Svaki anime ima id, title, genres, studio i rating
@@ -164,6 +168,71 @@
            (sort-by #(count-matching-genres watched %) >)
            (take 3)))))
     
+;;HTML stranica
+(defn home-page []
+  (content-type
+   (response
+    "<!DOCTYPE html>
+<html>
+<head>
+   <meta charset='UTF-8'>
+   <title>Anime Recommender</title>  
+   <style> 
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+    h1 { color: #e50914; }
+    input, select { padding: 8px; margin: 5px; width: 300px; }
+    button { padding: 8px 20px; background: #e50914; color: white; border: none; cursor: pointer; }
+    #results { margin-top: 20px; }
+    .anime-card { border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 5px; }
+  </style> 
+<head>
+<body>
+  <h1>Anime Recommender</h1>
+  <select id='search-type'>
+    <option value='recommend'>Preporuka po animeu</option>
+    <option value='genre'>Pretraga po zanru</option>
+    <option value='studio'>Pretraga po studiju</option>
+  </select>
+  <br>
+  <input type='text' id='search-input' placeholder='Unesi naziv...'/>
+  <button onclick='search()'>Trazi</button>
+  <div id='results'></div>
+  <script>
+    function search() {
+      var type = document.getElementById('search-type').value;
+      var input = document.getElementById('search-input').value;
+      fetch('/api/' + type + '?q=' + encodeURIComponent(input))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var html = '';
+          if (data.length === 0) {
+            html = '<p>Nema rezultata.</p>';
+          } else {
+            data.forEach(function(anime) {
+              html += '<div class=\"anime-card\">';
+              html += '<b>' + anime.title + '</b><br>';
+              html += 'Studio: ' + anime.studio + '<br>';
+              html += 'Rating: ' + anime.rating + '<br>';
+              html += 'Zanrovi: ' + anime.genres.join(', ');
+              html += '</div>';
+            });
+          }
+          document.getElementById('results').innerHTML = html;
+        });
+    }
+  </script>
+</body>
+</html>")
+    "text/html"))
+
+;;Rute
+
+(defroutes app-routes
+  (GET "/" [] (home-page))
+  (GET "/api/recommend" [q] (content-type (response (json/encode (recommend q))) "aplication/json"))
+  (GET "/api/genre" [q] (content-type (response (json/encode (find-by-genre q))) "aplication/json"))
+  (GET "/api/studio" [q] (content-type (response (json/encode (find-by-studio q))) "aplication/json")))
+
 
 (defn print-anime-list
   "Ispisuje listu animea sa rednim brojevima"
@@ -185,24 +254,6 @@
 (defn -main
   "Anime Recommender - entry point"
   [& args]
-  (println "Dobrodošli u Anime Recommeder!")
-  (println "Broj animea u bazi:" (count anime-db))
-  (loop []
-    (show-menu)
-    (let [input (read-line)]
-    (cond
-      (= input "1") (do (print "Unesi žanr: ") (flush)
-                        (print-anime-list (find-by-genre (read-line)))
-                        (recur))
-      (= input "2") (do (print "Unesi studio: ") (flush)
-                        (print-anime-list (find-by-studio (read-line)))
-                        (recur))
-      (= input "3") (do (print "Unesi naziv animea: ") (flush)
-                        (let [result (recommend (read-line))]
-                          (if (seq result)
-                            (print-anime-list result)
-                            (println "Nije pronađen anime!")))
-                        (recur))
-      (= input "4") (println "Doviđenja!")
-      :else (do (println "Nepostojeća opcija!") (recur))))))
+  (println "Pokrećemo Anime Recommender na http://localhost:3000")
+  (run-jetty app-routes {:port 3000 :join? false}))
   
