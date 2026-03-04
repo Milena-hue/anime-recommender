@@ -165,13 +165,44 @@
            (take 3)))))
     
 
+(defn print-anime-list
+  "Ispisuje listu animea sa rednim brojevima"
+  [anime-list]
+  (doseq [anime anime-list]
+    (println "-" (:title anime) "| Žanr:" (:genres anime) "| Rating:" (:rating anime))))
+
+(defn show-menu []
+  (println "\n=== ANIME RECOMMENDER ===")
+  (println "1. Pretraga po žanru")
+  (println "2. Pretraga po studiju")
+  (println "3. Preporuka na osnovu animea")
+  (println "4. Izlaz")
+  (println "Izaberi opciju: ")
+  (flush))
+
+
 
 (defn -main
   "Anime Recommender - entry point"
   [& args]
   (println "Dobrodošli u Anime Recommeder!")
   (println "Broj animea u bazi:" (count anime-db))
-  (println "\nPreporuka za Bleach:")
-  (doseq [anime (recommend "Bleach")]
-    (println "-" (:title anime) "| Rating:" (:rating anime))))
+  (loop []
+    (show-menu)
+    (let [input (read-line)]
+    (cond
+      (= input "1") (do (print "Unesi žanr: ") (flush)
+                        (print-anime-list (find-by-genre (read-line)))
+                        (recur))
+      (= input "2") (do (print "Unesi studio: ") (flush)
+                        (print-anime-list (find-by-studio (read-line)))
+                        (recur))
+      (= input "3") (do (print "Unesi naziv animea: ") (flush)
+                        (let [result (recommend (read-line))]
+                          (if (seq result)
+                            (print-anime-list result)
+                            (println "Nije pronađen anime!")))
+                        (recur))
+      (= input "4") (println "Doviđenja!")
+      :else (do (println "Nepostojeća opcija!") (recur))))))
   
