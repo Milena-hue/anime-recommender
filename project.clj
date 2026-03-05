@@ -7,7 +7,8 @@
                  [ring/ring-core "1.9.6"]
                  [ring/ring-jetty-adapter "1.9.6"]
                  [compojure "1.7.0"]
-                 [cheshire "5.12.0"]]
+                 [cheshire "5.12.0"]
+                 [clj-http "3.12.3"]]
   :main ^:skip-aot anime-recommender.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
