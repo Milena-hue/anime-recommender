@@ -7,8 +7,8 @@
   "Prima dva animea, vraća broj zajedničkih žanrova"
   [anime1 anime2]
   (count (filter (fn [genre]
-            (some #(= % genre) (:genres anime2)))
-          (:genres anime1))))
+                   (some #(= % genre) (:genres anime2)))
+                 (:genres anime1))))
 
 ;;Pretraga po žanru
 ;;Filter prolazi kroz sve anime i izdvaja samo one koji imaju traženi žanr

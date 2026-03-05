@@ -8,4 +8,4 @@
 ;;Učitamo animee sa MAL-a po ID-ju
 ;;mapv prolazi kroz sve ID-jeve i za svaki poziva get-anime-by-id
 (def anime-db
- (mapv get-anime-by-id mal-ids))
+  (mapv get-anime-by-id mal-ids))

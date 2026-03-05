@@ -9,6 +9,7 @@
                  [compojure "1.7.0"]
                  [cheshire "5.12.0"]
                  [clj-http "3.12.3"]]
+  :plugins [[lein-cljfmt "0.9.2"]]
   :main ^:skip-aot anime-recommender.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
