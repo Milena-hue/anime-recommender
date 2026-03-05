@@ -52,7 +52,7 @@
       <option value='mal'>Preuzmi anime sa MAL-a (ID)</option>
     </select>
     <input type='text' id='search-input' placeholder='Unesi naziv ili MAL ID...'/>
-    <button onclick='search()'>Pretrazi</button>
+    <button onclick='search()'>Pretraži</button>
   </div>
   <div id='results'></div>
   <script>
